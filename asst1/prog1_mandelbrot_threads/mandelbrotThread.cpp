@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
-
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "CycleTimer.h"
 
 typedef struct {
@@ -38,35 +39,20 @@ void* workerThreadStart(void* threadArgs) {
     // half of the image and thread 1 could compute the bottom half.
 
     printf("Hello world from thread %d\n", args->threadId);
-//    int partition = (args->height)/(args->numThreads);
-//    int numRows;
-//    if ((args->threadId+1) == args->numThreads){
-//	numRows = (args->height)-(args->threadId)*partition;
-//    }
-//    else{
-//        numRows= partition;
-//    }
-//	
-//    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
-//	 args->height, (args->threadId)*partition, numRows,
-//	 args->maxIterations, args->output);
     
     int tid = args->threadId;
     int n = args->numThreads;
-    int startRow;
-    int numRows;
-    if (tid == 0){
-        startRow=0;
-        numRows=600-int(0.2675*400);
-    }
-    if (tid == 1){
-        startRow=600-int(0.2675*400);
-        numRows=2*int(0.2675*400);
-    }
-    if (tid==2){
-        startRow=600+int(0.2675*400);
-        numRows=args->height-startRow;
-    }
+    int startRow = 0;
+    int endRow = args->height;
+    
+    if (tid > 0)
+        startRow = 200 + tid*800/n;
+    
+    if (tid < n-1)
+        endRow = 200 + (tid+1)*800/n;
+    
+    numRows = endRow - startRow;
+    
     mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
        args->height, startRow, numRows,
        args->maxIterations, args->output);
