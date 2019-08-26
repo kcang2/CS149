@@ -88,18 +88,25 @@ You will not need to make use of any other pthread API calls in this assignment.
   generation work accordingly (threads should get blocks of the image). Note that the processor only has four cores but each
   core supports two hyper-threads, so it can execute a total of eight threads interleaved on its execution contents.
   In your write-up, produce a graph of __speedup compared to the reference sequential implementation__ as a function of the number of threads used FOR VIEW 1. Is speedup linear in the number of threads used? In your writeup hypothesize why this is (or is not) the case? (you may also wish to produce a graph for VIEW 2 to help you come up with a good answer. Hint: take a careful look at the three-thread datapoint.)  
+  **Speedup is not linear in # of threads used. When using 3 threads, thread 1 takes much longer than the other 2, due to   the large cardioid in the middle of view 1 (white = high computation). The same is not observed for view 2 due to the     absence of any large white blobs**
 3.  To confirm (or disprove) your hypothesis, measure the amount of time
   each thread requires to complete its work by inserting timing code at
   the beginning and end of `workerThreadStart()`. How do your measurements
-  explain the speedup graph you previously created?
+  explain the speedup graph you previously created?  
+ ```
+Thread: [0]	[77.762] ms  
+Thread: [2]	[77.558] ms  
+Thread: [1]	[240.241] ms  
+```
 4.  Modify the mapping of work to threads to achieve to improve speedup to
   at __about 7-8x on both views__ of the Mandelbrot set (if you're above 7x that's fine, don't sweat it). You may not use any
   synchronization between threads in your solution. We are expecting you to come up with a single work decomposition policy that will work well for all thread counts---hard coding a solution specific to each configuration is not allowed! (Hint: There is a very simple static
   assignment that will achieve this goal, and no communication/synchronization
   among threads is necessary.). In your writeup, describe your approach to parallelization
-  and report the final 8-thread speedup obtained. 
-5. Now run your improved code with 16 threads. Is performance noticably greater than when running with eight threads? Why or why not? 
-  
+  and report the final 8-thread speedup obtained.  
+  **Partition large blobs equally amongst threads. Assume they are rectangular and not circle, else we need numerical methods like Newton's method to get the correct row number. Also tried round-robin/alternating threads for each row (since C is row-major). Both yielded 6.x speedup on a i7-7700k. Still unsure why 7.x could not be achieved**  
+5. Now run your improved code with 16 threads. Is performance noticably greater than when running with eight threads? Why or why not?  
+**No. The limiting factor is likely the architecture of the CPU. Only 4 cores, 8 threads (hyper-threading: 2 threads per core) are available. Any additional threads are interleaved multi-threading instead of simultaneous multi-threading/superscalar.**
 ## Program 2: Vectorizing Code Using SIMD Intrinsics (25 points) ##
 
 Take a look at the function `clampedExpSerial` in `prog2_vecintrin/main.cpp` of the
