@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <pthread.h>
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include "CycleTimer.h"
 
 typedef struct {
@@ -24,9 +22,26 @@ extern void mandelbrotSerial(
     int output[]);
 
 
-//
+static inline int mandel(float c_re, float c_im, int count)
+{
+    float z_re = c_re, z_im = c_im;
+    int i;
+    for (i = 0; i < count; ++i) {
+
+        if (z_re * z_re + z_im * z_im > 4.f)
+            break;
+
+        float new_re = z_re*z_re - z_im*z_im;
+        float new_im = 2.f * z_re * z_im;
+        z_re = c_re + new_re;
+        z_im = c_im + new_im;
+    }
+
+    return i;
+}
+
+
 // workerThreadStart --
-//
 // Thread entrypoint.
 void* workerThreadStart(void* threadArgs) {
     double startTime = CycleTimer::currentSeconds();
@@ -39,24 +54,48 @@ void* workerThreadStart(void* threadArgs) {
     // half of the image and thread 1 could compute the bottom half.
 
     printf("Hello world from thread %d\n", args->threadId);
-    
-    int tid = args->threadId;
-    int n = args->numThreads;
-    int startRow = 0;
-    int endRow = args->height;
-    
-    if (tid > 0)
-        startRow = 200 + tid*800/n;
-    
-    if (tid < n-1)
-        endRow = 200 + (tid+1)*800/n;
-    
-    numRows = endRow - startRow;
-    
-    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
-       args->height, startRow, numRows,
-       args->maxIterations, args->output);
- 
+
+    // Naive Partitioning
+//    int start = args->threadId * args->height / args->numThreads;
+//    int end = (args->threadId+1) * args->height / args->numThreads;
+//    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
+//                    args->height, start, end-start,
+//                    args->maxIterations, args->output);
+
+    // Partition cardioid and disks
+    int lines[8] = {0, 95, 210, 450, 750, 990, 1102, args->height};
+    for (int k=0; k<7; ++k) {
+
+      int top = lines[k];
+      int bot = lines[k+1];
+	int start = top;
+	int end = bot;
+
+        if (args->threadId > 0)
+            start = top + args->threadId*(bot - top)/args->numThreads;
+        if (args->threadId < args->numThreads)
+            end = top + (args->threadId + 1)*(bot - top)/args->numThreads;
+
+       mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
+                        args->height, start, end-start,
+                        args->maxIterations, args->output);
+    }
+
+    // Alternate (Round-Robin) rows
+//    float dx = (args->x1 - args->x0) / args->width;
+//    float dy = (args->y1 - args->y0) / args->height;
+//
+//    for (int j = args->threadId; j < args->height; j+=args->numThreads) {
+//        for (int i = 0; i < args->width; ++i) {
+//            float x = args->x0 + i * dx;
+//            float y = args->y0 + j * dy;
+//
+//            int index = (j * args->width + i);
+//            args->output[index] = mandel(x, y, args->maxIterations);
+//        }
+//    }
+
+
     double endTime = CycleTimer::currentSeconds();
     printf("Thread: [%i]\t[%.3f] ms\n", args->threadId, (endTime - startTime)*1000);
     return NULL;
@@ -98,7 +137,6 @@ void mandelbrotThread(
         args[i].maxIterations = maxIterations;
         args[i].numThreads = numThreads;
         args[i].output = output;
-      
         args[i].threadId = i;
     }
 
