@@ -1,8 +1,8 @@
 // Define vector unit width here
-#define VECTOR_WIDTH 4
+#define VECTOR_WIDTH 16
 
-#ifndef CS149INTRIN_H_
-#define CS149INTRIN_H_
+#ifndef CS149INTRIN_H
+#define CS149INTRIN_H
 
 #include <cstdlib>
 #include <cmath>
@@ -13,7 +13,6 @@
 //*******************
 
 extern Logger CS149Logger;
-
 template <typename T>
 struct __cs149_vec {
   T value[VECTOR_WIDTH];
@@ -121,6 +120,6 @@ void _cs149_hadd_float(__cs149_vec_float &vecResult, __cs149_vec_float &vec);
 void _cs149_interleave_float(__cs149_vec_float &vecResult, __cs149_vec_float &vec);
 
 // Add a customized log to help debugging
-void addUserLog(const char * logStr);
+void addUserLog(const char * logStr, __cs149_mask &mask);
 
 #endif

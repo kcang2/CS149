@@ -7,7 +7,9 @@
 using namespace std;
 
 #define EXP_MAX 10
+
 Logger CS149Logger;
+
 void usage(const char* progname);
 void initValue(float* values, int* exponents, float* output, float* gold, unsigned int N);
 void absSerial(float* values, float* output, int N);
@@ -247,55 +249,6 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
   // Your solution should work for any value of
   // N and VECTOR_WIDTH, not just when VECTOR_WIDTH divides N
   //
-  __cs149_vec_float x;
-  __cs149_vec_int y;
-  __cs149_vec_float result;
-  __cs149_vec_float clamps;
-
-  __cs149_vec_int zeros = _cs149_vset_int(0);
-  __cs149_vec_int ones = _cs149_vset_int(1);
-
-  __cs149_mask maskAll, maskDone;
-  int n = N/VECTOR_WIDTH;
-  int m = N%VECTOR_WIDTH;
-
-  if (m > 0)
-    n += 1;
-  
-  for (int i=0; i<n; ++i) {
-
-    int lanes = VECTOR_WIDTH;
-    if (i==n-1 && m > 0)
-      lanes = m;
-
-    maskAll = _cs149_init_ones(lanes);
-    maskDone = _cs149_mask_not(maskAll);
-
-    _cs149_vload_float(x, values+i*lanes, maskAll);
-    _cs149_vload_int(y, exponents+i*lanes, maskAll);
-
-    _cs149_vset_float(result, 1.0f, maskAll);
-    _cs149_vset_float(clamps, 9.999999f, maskAll);
-    
-    _cs149_veq_int(maskDone, y, zeros, maskAll);
-
-    while (_cs149_cntbits(maskDone)<VECTOR_WIDTH) {
-      __cs149_mask masknotDone = _cs149_mask_not(maskDone);
-      _cs149_vmult_float(result, result, x, masknotDone);
-      _cs149_vsub_int(y, y, ones, masknotDone);
-      _cs149_veq_int(maskDone, y, zeros, masknotDone);
-
-      __cs149_mask maskClamp;
-      maskClamp = _cs149_init_ones(0);
-      _cs149_vgt_float(maskClamp, result, clamps, masknotDone);
-      _cs149_vset_float(result, 9.999999f, maskClamp);
-      maskDone = _cs149_mask_or(maskDone, maskClamp);
-    }
-
- 
-    _cs149_vstore_float(output+i*VECTOR_WIDTH, result, maskAll);
-  }
-
   
 }
 

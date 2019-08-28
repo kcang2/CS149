@@ -4,7 +4,6 @@
 //******************
 //* Implementation *
 //******************
-
 __cs149_mask _cs149_init_ones(int first) {
   __cs149_mask mask;
   for (int i=0; i<VECTOR_WIDTH; i++) {
@@ -255,7 +254,7 @@ template void _cs149_interleave<float>(__cs149_vec_float &vecResult, __cs149_vec
 
 void _cs149_interleave_float(__cs149_vec_float &vecResult, __cs149_vec_float &vec) { _cs149_interleave<float>(vecResult, vec); }
 
-void addUserLog(const char * logStr) {
-  CS149Logger.addLog(logStr, _cs149_init_ones(), 0);
+void addUserLog(const char * logStr, __cs149_mask &mask) {
+  CS149Logger.addLog(logStr, mask, VECTOR_WIDTH);
 }
 
