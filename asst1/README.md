@@ -144,7 +144,7 @@ Does the vector utilization increase, decrease or stay the same as `VECTOR_WIDTH
 __Util decreases. As more lanes are available, there can also be more lanes inactive while other lanes are active at any given time.__  
 __Example, assume no clamping, and the input has 4 elements.__  
 __The exponents are__ ```3, 8, 1, 2```  
-__If we use a vector width of 2, the first part would run for 8 loops, 16 operations can be performed in that time. However, only 1 lane was active, so 8 operations were done in total.__  
+__If we use a vector width of 2, the first part would run for 8 loops, 16 operations can be performed in that time. However, both lanes were active for only 3 iterations, so 11 operations were done in total.__  
 __For second part, it has 2 loops, so 4 operations can be done. The first loop has both lanes active, but only 1 lane is active at the second loop. So only 3 operations were done.__  
 ```Loops:``` ```8 8``` ```2 2```  
 ```Operations:``` ```3 8``` ```1 2```  
