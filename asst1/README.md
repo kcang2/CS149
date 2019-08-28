@@ -140,7 +140,18 @@ shows the percentage of vector lanes that are enabled.
 should work with any combination of input array size (`N`) and vector width (`VECTOR_WIDTH`). 
 2.  Run `./myexp -s 10000` and sweep the vector width from 2, 4, 8, to 16. Record the resulting vector 
 utilization. You can do this by changing the `#define VECTOR_WIDTH` value in `CS149intrin.h`. 
-Does the vector utilization increase, decrease or stay the same as `VECTOR_WIDTH` changes? Why?
+Does the vector utilization increase, decrease or stay the same as `VECTOR_WIDTH` changes? Why?  
+__Util decreases. As more lanes are available, there can also be more lanes inactive while other lanes are active at any given time.__  
+__Example, assume no clamping, and the input has 4 elements.__  
+__The exponents are__ ```3, 8, 1, 2```  
+__If we use a vector width of 2, the first part would run for 8 loops, 16 operations can be performed in that time. However, only 1 lane was active, so 8 operations were done in total.__  
+__For second part, it has 2 loops, so 4 operations can be done. The first loop has both lanes active, but only 1 lane is active at the second loop. So only 3 operations were done.__  
+```Loops:``` ```8 8``` ```2 2```  
+```Operations:``` ```3 8``` ```1 2```  
+```Utilization = (3+8+1+2)/(8+8+2+2) = 14/20 = 0.7```  
+__Consider if the vector width was 4. There would be 8 loops. Operations are:__ ```3 8 1 2```  
+```Utilization = (3+8+1+2)/(8+8+8+8) = 14/32 = 0.4375```  
+
 3.  _Extra credit: (1 point)_ Implement a vectorized version of `arraySumSerial` in `arraySumVector`. Your implementation may assume that `VECTOR_WIDTH` is a factor of the input array size `N`. Whereas the serial implementation has `O(N)` span, your implementation should have at most `O(N / VECTOR_WIDTH + log2(VECTOR_WIDTH))` span.  You may find the `hadd` and `interleave` operations useful.
 
 ## Program 3: Parallel Fractal Generation Using ISPC (20 points) ##
