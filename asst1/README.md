@@ -276,7 +276,8 @@ the foreach loop to yield a more straightforward implementation.
   Consider the characteristics of the computation you are performing?
   Describe the parts of the image that present challenges for SIMD
   execution? Comparing the performance of rendering the different views
-  of the Mandelbrot set may help confirm your hypothesis.)
+  of the Mandelbrot set may help confirm your hypothesis.)  
+__Expecting a max speedup of 8x due to 8-wide instructions, but got 5x and 4x in views 1 & 2, respectively. Reason being view 1 has a more-even distribution of computational cost (more even pixel intensity) than view 2. All 8 lanes of view 1 are more likely to be active together than view 2, hence less time is wasted in waiting for more high intensity lanes in 1 instruction to finish. Nonetheless, there are still constrastive edges in view 1 that prevent an ideal 8x speedup from happening.__  
 
   We remind you that for the code described in this subsection, the ISPC
   compiler maps gangs of program instances to SIMD instructions executed
@@ -305,14 +306,16 @@ different CPU cores).
 
 1.  Run `mandelbrot_ispc` with the parameter `--tasks`. What speedup do you
   observe on view 1? What is the speedup over the version of `mandelbrot_ispc` that
-  does not partition that computation into tasks?
+  does not partition that computation into tasks?  
+  __5x for ispc, 10x for ispc_task. ispc_task is 2x faster compared to ispc without task partitioning.__  
 2.  There is a simple way to improve the performance of
   `mandelbrot_ispc --tasks` by changing the number of tasks the code
   creates. By only changing code in the function
   `mandelbrot_ispc_withtasks()`, you should be able to achieve
   performance that exceeds the sequential version of the code by over 40 times!
   How did you determine how many tasks to create? Why does the
-  number you chose work best?
+  number you chose work best?  
+__Could only achieve 3X.XX times speedup. The number of tasks should be perfectly divisible by vector-width (8 in this case), else the output is wrong. The more the tasks created the better, but it should not exceed the number of rows in the image.__  
 3.  _Extra Credit: (2 points)_ What are differences between the pthread
   abstraction (used in Program 1) and the ISPC task abstraction? There
   are some obvious differences in semantics between the (create/join
