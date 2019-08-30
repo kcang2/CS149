@@ -354,7 +354,7 @@ Note: This problem is a review to double-check your understanding, as it covers 
   single CPU core (no tasks) and when using all cores (with tasks). What 
   is the speedup due to SIMD parallelization? What is the speedup due to 
   multi-core parallelization?  
-  __SIMD: 7.96, Multi-core: 46.47__
+  __SIMD: 7.96, Multi-core: 51.86__
 2.  Modify the contents of the array values to improve the relative speedup 
   of the ISPC implementations. Describe a very-good-case input that __maximizes speedup over the sequential version of the code__ and report the resulting speedup achieved (for both the with- and without-tasks ISPC implementations). Does your modification improve SIMD speedup?
   Does it improve multi-core speedup (i.e., the benefit of moving from ISPC without-tasks to ISPC with tasks)? Please explain why.
