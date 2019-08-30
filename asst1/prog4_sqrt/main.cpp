@@ -34,7 +34,10 @@ int main() {
         // to you generate best and worse-case speedups
         
         // starter code populates array with random input values
-        values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
+//        values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
+        // LOWER BOUND + RANGE
+//          values[i] = 2.999f;
+        values[i] = 1.0f;
     }
 
     // generate a gold version to check results
@@ -58,7 +61,7 @@ int main() {
     verifyResult(N, output, gold);
 
     //
-    // Compute the image using the ispc implementation; report the minimum
+    // Compute the square-root using the ispc implementation; report the minimum
     // time of three runs.
     //
     double minISPC = 1e30;
