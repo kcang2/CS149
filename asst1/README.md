@@ -357,9 +357,11 @@ Note: This problem is a review to double-check your understanding, as it covers 
   __SIMD: 7.96, Multi-core: 51.86__
 2.  Modify the contents of the array values to improve the relative speedup 
   of the ISPC implementations. Describe a very-good-case input that __maximizes speedup over the sequential version of the code__ and report the resulting speedup achieved (for both the with- and without-tasks ISPC implementations). Does your modification improve SIMD speedup?
-  Does it improve multi-core speedup (i.e., the benefit of moving from ISPC without-tasks to ISPC with tasks)? Please explain why.
+  Does it improve multi-core speedup (i.e., the benefit of moving from ISPC without-tasks to ISPC with tasks)? Please explain why.  
+__Both SIMD & Multicore experience speedups of 12x and 73x, respectively. This is due to the fact that fixed inputs of 2.999f take the longest for the serial implementation to converge. Basically, both SIMD & multicore were made to "look good" by making the serial implementation "look bad".__  
 3.  Construct a very-bad-case input for `sqrt` that __minimizes speedup for ISPC with no tasks__. Describe this input, describe why you chose it, and report the resulting relative performance of the ISPC implementations. What is the reason for the loss in efficiency? 
-    __(keep in mind we are using the `--target=avx2` option for ISPC, which generates 8-wide SIMD instructions)__. 
+    __(keep in mind we are using the `--target=avx2` option for ISPC, which generates 8-wide SIMD instructions)__.  
+__Using fixed inputs of 1.0f, both SIMD and multicore have speedups of only ~2x. This is because the square-root of 1.0f is easy for the serial implementation to converge (within 1 iteration, as shown in the graph) as the initial guess was initialized to 1.0f. Thus, the ISPC-based implementations cannot provide much speedup since the serial implementation is already so fast.__  
 4.  _Extra Credit: (up to 2 points)_ Write your own version of the `sqrt` 
  function manually using AVX2 intrinsics. To get credit your 
     implementation should be nearly as fast (or faster) than the binary 
