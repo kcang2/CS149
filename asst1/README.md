@@ -382,8 +382,9 @@ elements used. `saxpy` is a *trivially parallelizable computation* and features 
 1.  Compile and run `saxpy`. The program will report the performance of
   ISPC (without tasks) and ISPC (with tasks) implementations of saxpy. What 
   speedup from using ISPC with tasks do you observe? Explain the performance of this program.
-  Do you think it can be substantially improved? (For example, could you rewrite the code to achieve near linear speedup? Yes or No? Please justify your answer.)
-2. __Extra Credit:__ (1 point) Note that the total memory bandwidth consumed computation in `main.cpp` is `TOTAL_BYTES = 4 * N * sizeof(float);`.  Even though `saxpy` loads one element from X, one element from Y, and writes on element to `result` the multiplier by 4 is correct.  Why is this the case? (Hint, think about how CPU caches work.)
+  Do you think it can be substantially improved? (For example, could you rewrite the code to achieve near linear speedup? Yes or No? Please justify your answer.)  
+  __The speedup of using tasks is 0.96x, which means using tasks actually under-performed. Probably because there are 3 memory operations (load X, load Y, store result), so the tasks are bandwidth limited. These long memory accesses cannot be alleviated with more cores used, in fact using more cores slows things down a bit due to control overheads.
+2. __Extra Credit:__ (1 point) Note that the total memory bandwidth consumed computation in `main.cpp` is `TOTAL_BYTES = 4 * N * sizeof(float);`.  Even though `saxpy` loads one element from X, one element from Y, and writes one element to `result` the multiplier by 4 is correct.  Why is this the case? (Hint, think about how CPU caches work.)
 3. __Extra Credit:__ (points handled on a case-by-case basis) Improve the performance of `saxpy`.
   We're looking for a significant speedup here, not just a few percentage 
   points. If successful, describe how you did it and what a best-possible implementation on these systems might achieve.
