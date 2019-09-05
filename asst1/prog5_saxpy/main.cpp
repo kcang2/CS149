@@ -54,9 +54,9 @@ int main() {
     }
 
 // printf("[saxpy serial]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
-    //       minSerial * 1000,
-    //       toBW(TOTAL_BYTES, minSerial),
-    //       toGFLOPS(TOTAL_FLOPS, minSerial));
+//           minSerial * 1000,
+//           toBW(TOTAL_BYTES, minSerial),
+//          toGFLOPS(TOTAL_FLOPS, minSerial));
 
     // Clear out the buffer
     for (unsigned int i = 0; i < N; ++i)
@@ -99,8 +99,8 @@ int main() {
            toGFLOPS(TOTAL_FLOPS, minTaskISPC));
 
     printf("\t\t\t\t(%.2fx speedup from use of tasks)\n", minISPC/minTaskISPC);
-    //printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
-    //printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
+//    printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
+//    printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
 
     delete[] arrayX;
     delete[] arrayY;

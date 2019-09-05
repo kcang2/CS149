@@ -9,6 +9,7 @@
 using namespace ispc;
 
 extern void sqrtSerial(int N, float startGuess, float* values, float* output);
+extern void sqrtAVX2(int N, float startGuess, float* values, float* output);
 
 static void verifyResult(int N, float* result, float* gold) {
     for (int i=0; i<N; i++) {
@@ -23,9 +24,28 @@ int main() {
     const unsigned int N = 20 * 1000 * 1000;
     const float initialGuess = 1.0f;
 
-    float* values = new float[N];
-    float* output = new float[N];
-    float* gold = new float[N];
+    float* values = NULL;  // If you allocated here, posix_memalign would reallocate. Memory Leak
+    float* output = NULL;  // DITTO
+    float* gold = new float [N];  // Allocate since didn't call posix_memalign later
+
+    // Allocate N floats (Nx4 bytes) for ptr, with a starting address that is multiple of 32 bytes
+    // The start address prevents misaligned memory. We are using 256-bit vectors,
+    // so that would be 32 bytes. The CPU fetches 32 bytes of data from memory per vector.
+    // Assuming a 32-bit CPU, it has a memory granularity of 4 bytes (4 bytes loaded per cycle)
+    char ret = 0;
+    ret = posix_memalign((void **)&values, 32, sizeof(float) * N);
+    if (ret != 0)
+    {
+        printf("%s\n", strerror(ret));
+        return 1;
+    }
+
+    ret = posix_memalign((void **)&output, 32, sizeof(float) * N);
+    if (ret != 0)
+    {
+        printf("%s\n", strerror(ret));
+        return 1;
+    }
 
     for (unsigned int i=0; i<N; i++)
     {
@@ -34,10 +54,10 @@ int main() {
         // to you generate best and worse-case speedups
         
         // starter code populates array with random input values
-//        values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
+        values[i] = .001f + 2.998f * static_cast<float>(rand()) / RAND_MAX;
         // LOWER BOUND + RANGE
-//          values[i] = 2.999f;
-        values[i] = 1.0f;
+//        values[i] = 2.999f;  // BEST
+//        values[i] = 1.0f;   // WORST
     }
 
     // generate a gold version to check results
@@ -81,7 +101,7 @@ int main() {
         output[i] = 0;
 
     //
-    // Tasking version of the ISPC code
+    // ISPC with tasks
     //
     double minTaskISPC = 1e30;
     for (int i = 0; i < 3; ++i) {
@@ -97,6 +117,29 @@ int main() {
 
     printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
     printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
+
+    // Clear out the buffer
+    for (unsigned int i = 0; i < N; ++i)
+        output[i] = 0;
+
+    //
+    // Tasking version of the AVX code
+    //
+    double minAVX2 = 1e30;
+    for (int i = 0; i < 3; ++i) {
+        double startTime = CycleTimer::currentSeconds();
+        sqrtAVX2(N, initialGuess, values, output);
+        double endTime = CycleTimer::currentSeconds();
+        minAVX2 = std::min(minAVX2, endTime - startTime);
+    }
+
+    printf("[sqrt avx2]:\t\t[%.3f] ms\n", minAVX2 * 1000);
+
+    verifyResult(N, output, gold);
+
+    printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
+    printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
+    printf("\t\t\t\t(%.2fx speedup from AVX2)\n", minSerial/minAVX2);
 
     delete [] values;
     delete [] output;
